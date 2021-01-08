@@ -1,22 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using JWTApi.Data;
 using JWTApi.Dto;
 using JWTApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 
 namespace JWTApi.Controllers
 {
-
+    [Authorize]
     [Route("api/category")]
     [ApiController]
+
     public class CategoryController : ControllerBase
     {
-
 
         //! เป็นการช้งาน Dependency injection (DI) โดยการไม่เรียกใช้งาน new 
         //! เหมือนบรรทัดที่ 20
@@ -39,17 +41,23 @@ namespace JWTApi.Controllers
 
         //Get api/Category
         [HttpGet]
-        public ActionResult<IEnumerable<Category>> GetAllCategory()
+        public async Task<ActionResult<IEnumerable<Category>>> GetAllCategory()
         {
-            var _ImpCat = Impcat.GetAllCategoty();
+            var t_ImpCat = Impcat.GetAllCategoty();
+            await Task.WhenAll(t_ImpCat);
+            var _ImpCat = await t_ImpCat;
+
             return Ok(_mapper.Map<IEnumerable<CategoryReadDto>>(_ImpCat));
         }
 
         //Get api/Category/{id}
         [HttpGet("{id}", Name = "GetCategoryById")]
-        public ActionResult<CategoryReadDto> GetCategoryById(int id)
+        public async Task<ActionResult<CategoryReadDto>> GetCategoryById(int id)
         {
-            var _ImpCat = Impcat.GetCategoryById(id);
+            var t_ImpCat = Impcat.GetCategoryById(id);
+            await Task.WhenAll(t_ImpCat);
+            var _ImpCat = await t_ImpCat;
+
             if (_ImpCat != null)
             {
                 return Ok(_mapper.Map<CategoryReadDto>(_ImpCat));
@@ -80,9 +88,11 @@ namespace JWTApi.Controllers
 
         //Put api/Category/{id}
         [HttpPut("{id}")]
-        public ActionResult UpdateCategory(int id, CategoryUpdateDto categoryUpdateDto)
+        public async Task<ActionResult> UpdateCategory(int id, CategoryUpdateDto categoryUpdateDto)
         {
-            var categoryModelFromImpCat = Impcat.GetCategoryById(id);
+            var _categoryModelFromImpCat = Impcat.GetCategoryById(id);
+            await Task.WhenAll(_categoryModelFromImpCat);
+            var categoryModelFromImpCat = await _categoryModelFromImpCat;
             if (categoryModelFromImpCat == null)
             {
                 return NotFound();
@@ -101,9 +111,12 @@ namespace JWTApi.Controllers
 
         //Patch api/Category/{id}
         [HttpPatch("{id}")]
-        public ActionResult PartialUpdateCategory(int id, JsonPatchDocument<CategoryUpdateDto> patchDoc)
+        public async Task<ActionResult> PartialUpdateCategory(int id, JsonPatchDocument<CategoryUpdateDto> patchDoc)
         {
-            var categoryModelFromImpCat = Impcat.GetCategoryById(id);
+            var _categoryModelFromImpCat = Impcat.GetCategoryById(id);
+            await Task.WhenAll(_categoryModelFromImpCat);
+            var categoryModelFromImpCat = await _categoryModelFromImpCat;
+
             if (categoryModelFromImpCat == null)
             {
                 return NotFound();
@@ -128,9 +141,12 @@ namespace JWTApi.Controllers
 
         //Delete api/Category/{id}
         [HttpDelete("{id}")]
-        public ActionResult DeleteCategory(int id)
+        public async Task<ActionResult> DeleteCategory(int id)
         {
-            var categoryModelFromImpCat = Impcat.GetCategoryById(id);
+            var _categoryModelFromImpCat = Impcat.GetCategoryById(id);
+            await Task.WhenAll(_categoryModelFromImpCat);
+            var categoryModelFromImpCat = await _categoryModelFromImpCat;
+
             if (categoryModelFromImpCat == null)
             {
                 return NotFound();

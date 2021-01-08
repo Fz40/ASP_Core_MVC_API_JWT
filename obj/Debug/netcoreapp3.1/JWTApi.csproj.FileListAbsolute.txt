@@ -73,3 +73,4 @@ D:\ASP_Net_Core_MVC\API\JWTApi\obj\Debug\netcoreapp3.1\JWTApi.genruntimeconfig.c
 D:\ASP_Net_Core_MVC\API\JWTApi\bin\Debug\netcoreapp3.1\Microsoft.AspNetCore.JsonPatch.dll
 D:\ASP_Net_Core_MVC\API\JWTApi\bin\Debug\netcoreapp3.1\Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
 D:\ASP_Net_Core_MVC\API\JWTApi\bin\Debug\netcoreapp3.1\Newtonsoft.Json.Bson.dll
+D:\ASP_Net_Core_MVC\API\JWTApi\bin\Debug\netcoreapp3.1\Microsoft.AspNetCore.Authentication.JwtBearer.dll

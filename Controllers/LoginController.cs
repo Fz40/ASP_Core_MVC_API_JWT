@@ -1,45 +1,32 @@
 using System;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
+using JWTApi.Data;
 using JWTApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
-
 namespace JWTApi.Controllers
 {
-
+    [Authorize]
     [Route("api/Login")]
     [ApiController]
-    public class LoginController : Controller
+    public class LoginController : ControllerBase
     {
-
-        private IConfiguration _config;
-        private ILogger<LoginController> _logger;
-
-        public LoginController(IConfiguration config, ILogger<LoginController> logger)
+        private IAuthenService _Authen;
+        public LoginController(IAuthenService Authen)
         {
-            _config = config;
-            _logger = logger;
+            _Authen = Authen;
         }
-
-        [HttpGet]
-        public IActionResult Login(string username, string pass)
+        [AllowAnonymous]
+        [HttpPost]
+        public IActionResult Login(UserModel login)
         {
             try
             {
-                UserModel login = new UserModel();
-                login.UserID = username;
-                login.Password = pass;
                 IActionResult response = Unauthorized();
 
-                var user = AuthenticateUser(login);
+                var user = _Authen.AuthenticateUser(login);
                 if (user != null)
                 {
-                    var tokenStr = GennerateJSONWebToken(user);
+                    var tokenStr = _Authen.GennerateJSONWebToken(user);
                     response = Ok(new { token = tokenStr });
                 }
 
@@ -47,48 +34,22 @@ namespace JWTApi.Controllers
             }
             catch (Exception)
             {
-                _logger.LogError("Failed to execute GET");
                 return BadRequest();
             }
         }
 
-        private UserModel AuthenticateUser(UserModel login)
+        [HttpGet, Authorize]
+        public IActionResult Get()
         {
-            UserModel userlogin = null;
-            if (login.UserID == "admin" && login.Password == "123")
+            try
             {
-                userlogin = new UserModel { UserID = "admin", Password = "123", Email = "xx@xx.com" };
-
+                return Ok();
             }
-            return userlogin;
-        }
-
-        private string GennerateJSONWebToken(UserModel userinfo)
-        {
-            var SecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:Key"]));
-            var credentials = new SigningCredentials(SecurityKey, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
+            catch (Exception)
             {
-                new Claim(JwtRegisteredClaimNames.Sub,userinfo.UserID),
-                new Claim(JwtRegisteredClaimNames.Email,userinfo.Email),
-                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString())
-            };
-
-            var token = new JwtSecurityToken(
-                issuer: _config["JWT:Issuer"],
-                audience: _config["JWT:Issuer"],
-                claims,
-                expires: DateTime.Now.AddMinutes(120),
-                signingCredentials: credentials
-            );
-
-            var encodetoken = new JwtSecurityTokenHandler().WriteToken(token);
-            return encodetoken;
+                return BadRequest();
+            }
         }
-
-
-
 
     }
 }
